@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>安全加载中</title>
+  <style>
+    /* 优化后的CSS - 移除了重复规则 */
+    .container {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: rotate-move 2s ease-in-out infinite;
+      z-index: 1000;
+    }
+
+    .dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: #000;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+    }
+
+    .dot-3 {
+      background-color: #f74d75;
+      animation: dot-3-move 2s ease infinite;
+    }
+
+    .dot-2 {
+      background-color: #10beae;
+      animation: dot-2-move 2s ease infinite;
+    }
+
+    .dot-1 {
+      background-color: #ffe386;
+      animation: dot-1-move 2s ease infinite;
+    }
+
+    @keyframes dot-3-move {
+      20% { transform: scale(1); }
+      45% { transform: translateY(-18px) scale(.45); }
+      60% { transform: translateY(-25px) scale(.45); }
+      80% { transform: translateY(-25px) scale(.45); }
+      100% { transform: translateY(0px) scale(1); }
+    }
+
+    @keyframes dot-2-move {
+      20% { transform: scale(1); }
+      45% { transform: translate(-16px, 12px) scale(.45); }
+      60% { transform: translate(-20px, 15px) scale(.45); }
+      80% { transform: translate(-20px, 15px) scale(.45); }
+      100% { transform: translateY(0px) scale(1); }
+    }
+
+    @keyframes dot-1-move {
+      20% { transform: scale(1); }
+      45% { transform: translate(16px, 12px) scale(.45); }
+      60% { transform: translate(20px, 15px) scale(.45); }
+      80% { transform: translate(20px, 15px) scale(.45); }
+      100% { transform: translateY(0px) scale(1); }
+    }
+
+    @keyframes rotate-move {
+      55% { transform: translate(-50%, -50%) rotate(0deg); }
+      80% { transform: translate(-50%, -50%) rotate(360deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .content {
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 10;
+    }
+    
+    /* 新增微信引导层样式 */
+    #weixinGuide {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    
+    .guide-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    .guide-btn {
+      display: inline-block;
+      background: #07C160;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 25px;
+      margin: 15px 5px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    
+    .guide-steps {
+      display: flex;
+      justify-content: space-around;
+      margin: 30px 0;
+    }
+    
+    .step {
+      text-align: center;
+      flex: 1;
+    }
+    
+    .step-number {
+      width: 30px;
+      height: 30px;
+      background: #07C160;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 加载动画 -->
+  <div class="container" id="loader">
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
+  </div>
+
+  <!-- 微信引导层 -->
+  <div id="weixinGuide">
+    <div class="guide-content">
+      <h2>安全访问提示</h2>
+      <p>微信限制了直接访问，请按以下步骤操作：</p>
+      
+      <div class="guide-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div>点击右上角</div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div>选择"在浏览器打开"</div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div>安全访问内容</div>
+        </div>
+      </div>
+      
+      <button class="guide-btn" id="copyBtn">复制链接</button>
+      <button class="guide-btn" id="openBtn">在浏览器打开</button>
+      
+      <p style="margin-top: 30px; font-size: 14px; color: #aaa;">
+        如无法自动跳转，请手动复制链接到浏览器
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // 检测是否在微信中
+    function isWeixinBrowser() {
+      const ua = navigator.userAgent.toLowerCase();
+      return ua.indexOf('micromessenger') !== -1;
+    }
+
+    // 主加载函数
+    function loadContent() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const encodedParam = urlParams.get('c');
+      
+      if (!encodedParam) {
+        console.error("缺少URL参数");
+        document.getElementById('loader').style.display = "none";
+        return;
+      }
+      
+      try {
+        // 解码Base64 URL
+        const trueUrl = atob(encodedParam);
+        
+        // 检查是否是有效的HTTP URL
+        if (!trueUrl.startsWith('http')) {
+          console.error("无效的URL:", trueUrl);
+          document.getElementById('loader').style.display = "none";
+          return;
+        }
+        
+        // 微信环境特殊处理
+        if (isWeixinBrowser()) {
+          // 显示微信引导层
+          document.getElementById('weixinGuide').style.display = "block";
+          document.getElementById('loader').style.display = "none";
+          
+          // 绑定按钮事件
+          document.getElementById('copyBtn').addEventListener('click', function() {
+            copyToClipboard(trueUrl);
+          });
+          
+          document.getElementById('openBtn').addEventListener('click', function() {
+            openInBrowser(trueUrl);
+          });
+        } 
+        // 非微信环境正常加载
+        else {
+          // 创建iframe
+          const iframe = document.createElement('iframe');
+          iframe.className = 'content';
+          iframe.src = trueUrl;
+          
+          // 修复后的onload事件绑定
+          iframe.onload = function() {
+            document.getElementById('loader').style.display = "none";
+            try {
+              bindMouseWheel(iframe);
+            } catch(e) {
+              console.error('绑定滚动事件失败:', e);
+            }
+          };
+          
+          document.body.appendChild(iframe);
+        }
+        
+      } catch(e) {
+        console.error("URL解码错误:", e);
+        document.getElementById('loader').style.display = "none";
+      }
+    }
+
+    // 复制到剪贴板
+    function copyToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          alert('链接已复制，请粘贴到浏览器打开');
+        } else {
+          alert('复制失败，请手动复制链接');
+        }
+      } catch (err) {
+        alert('复制失败，请手动复制链接');
+      }
+      
+      document.body.removeChild(textArea);
+    }
+
+    // 尝试在浏览器打开
+    function openInBrowser(url) {
+      // 尝试使用iframe跳转（部分安卓有效）
+      try {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 2000);
+      } catch(e) {
+        console.error('自动跳转失败:', e);
+      }
+      
+      // 复制链接到剪贴板
+      copyToClipboard(url);
+    }
+
+    // 原有鼠标滚轮函数（修复了函数名拼写）
+    var firefox = navigator.userAgent.indexOf('Firefox') != -1;
+    
+    function MouseWheel(e, doc) {
+      e.preventDefault && e.preventDefault();
+      e.returnValue = false;
+      var up = firefox && e.detail < 0 || e.wheelDelta > 0;
+      doc.body.scrollTop = doc.documentElement.scrollTop += up ? -50 : 50;
+    }
+
+    function bindMouseWheel(ifr) {  // 修复了函数名拼写
+      try {
+        var doc = ifr.contentWindow.document;
+        if (firefox) {
+          doc.addEventListener('DOMMouseScroll', function(e) {
+            MouseWheel(e, doc);
+          }, false);
+        } else {
+          doc.onmousewheel = function(e) {
+            MouseWheel(e || ifr.contentWindow.event, doc);
+          };
+        }
+      } catch(e) {
+        console.error('跨域无法获取iframe加载document:', e);
+      }
+    }
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', loadContent);
+  </script>
+</body>
+</html>
