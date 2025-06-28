@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>内容加载中 - GitHub Pages</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #1a1a2e;
+      color: #e6e6e6;
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    
+    .container {
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .status-container {
+      margin: 30px auto;
+      padding: 30px;
+      background: rgba(26, 26, 46, 0.8);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #4a4a8a;
+    }
+    
+    .status-container::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(74, 74, 138, 0.2) 0%, transparent 70%);
+      transform: rotate(30deg);
+      z-index: -1;
+    }
+    
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: #4cc9f0;
+      text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+    }
+    
+    .subtitle {
+      font-size: 18px;
+      color: #a9a9c7;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* 优化加载动画 */
+    .loader {
+      width: 120px;
+      height: 120px;
+      margin: 30px auto;
+      position: relative;
+    }
+    
+    .dot {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      transform-origin: center;
+    }
+    
+    .dot-1 {
+      background: linear-gradient(45deg, #f72585, #b5179e);
+      animation: dot-1-move 2s ease infinite;
+      box-shadow: 0 0 15px rgba(247, 37, 133, 0.6);
+    }
+    
+    .dot-2 {
+      background: linear-gradient(45deg, #4361ee, #3a0ca3);
+      animation: dot-2-move 2s ease infinite;
+      box-shadow: 0 0 15px rgba(67, 97, 238, 0.6);
+    }
+    
+    .dot-3 {
+      background: linear-gradient(45deg, #4cc9f0, #4895ef);
+      animation: dot-3-move 2s ease infinite;
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.6);
+    }
+    
+    .loader::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: rgba(76, 201, 240, 0.3);
+      animation: rotate 1.5s linear infinite;
+    }
+    
+    @keyframes dot-1-move {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(40px, -30px) scale(0.7); }
+      50% { transform: translate(0, -50px) scale(0.5); }
+      75% { transform: translate(-40px, -30px) scale(0.7); }
+    }
+    
+    @keyframes dot-2-move {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(-40px, 30px) scale(0.7); }
+      50% { transform: translate(0, 50px) scale(0.5); }
+      75% { transform: translate(40px, 30px) scale(0.7); }
+    }
+    
+    @keyframes dot-3-move {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(0, 40px) scale(0.7); }
+      50% { transform: translate(-40px, 0) scale(0.5); }
+      75% { transform: translate(0, -40px) scale(0.7); }
+    }
+    
+    @keyframes rotate {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .content {
+      display: none;
+      width: 100%;
+      height: 70vh;
+      border: none;
+      border-radius: 15px;
+      margin-top: 30px;
+      background: #0d0d1a;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
+    }
+    
+    .status-info {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(13, 13, 26, 0.7);
+      border-radius: 15px;
+      border-left: 4px solid #4361ee;
+    }
+    
+    .status-info h3 {
+      color: #4cc9f0;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .status-info h3 i {
+      margin-right: 10px;
+      font-size: 24px;
+    }
+    
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(67, 97, 238, 0.2);
+      border-radius: 4px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4361ee, #4cc9f0);
+      border-radius: 4px;
+      animation: progress 2s infinite;
+    }
+    
+    @keyframes progress {
+      0% { width: 0%; }
+      50% { width: 80%; }
+      100% { width: 100%; }
+    }
+    
+    .github-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 25px;
+      background: linear-gradient(45deg, #3a0ca3, #4361ee);
+      color: white;
+      text-decoration: none;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+    }
+    
+    .github-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.6);
+    }
+    
+    .error-message {
+      display: none;
+      padding: 20px;
+      margin-top: 30px;
+      background: rgba(247, 37, 133, 0.15);
+      border: 1px solid rgba(247, 37, 133, 0.5);
+      border-radius: 10px;
+      color: #f72585;
+    }
+    
+    .url-display {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(13, 13, 26, 0.7);
+      border-radius: 10px;
+      word-break: break-all;
+      font-family: monospace;
+      color: #4cc9f0;
+      border: 1px dashed rgba(76, 201, 240, 0.3);
+    }
+    
+    .success-message {
+      display: none;
+      padding: 20px;
+      margin-top: 20px;
+      background: rgba(76, 201, 240, 0.15);
+      border: 1px solid rgba(76, 201, 240, 0.5);
+      border-radius: 10px;
+      color: #4cc9f0;
+    }
+    
+    .action-buttons {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    .action-btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .reload-btn {
+      background: linear-gradient(45deg, #4361ee, #3a0ca3);
+      color: white;
+    }
+    
+    .guide-btn {
+      background: linear-gradient(45deg, #f72585, #b5179e);
+      color: white;
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 26px;
+      }
+      
+      .subtitle {
+        font-size: 16px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="status-container">
+      <h1><i class="fab fa-github"></i> GitHub Pages 内容加载器</h1>
+      <p class="subtitle">正在安全加载您请求的内容，请稍候...</p>
+      
+      <div class="loader">
+        <div class="dot dot-1"></div>
+        <div class="dot dot-2"></div>
+        <div class="dot dot-3"></div>
+      </div>
+      
+      <div class="status-info">
+        <h3><i class="fas fa-sync-alt fa-spin"></i> 加载状态</h3>
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+        <p>正在连接内容服务器，准备渲染页面</p>
+      </div>
+      
+      <div class="url-display" id="urlDisplay">
+        https://example.com (等待加载)
+      </div>
+      
+      <div class="error-message" id="errorMessage">
+        <h3><i class="fas fa-exclamation-triangle"></i> 加载错误</h3>
+        <p id="errorDetail">无法加载请求的内容。请检查URL是否正确。</p>
+        <p>GitHub Pages要求：</p>
+        <ul style="text-align: left; margin: 15px 20px;">
+          <li>文件名大小写必须与URL匹配</li>
+          <li>根URL需要提供index.html文件</li>
+          <li>URL参数必须正确编码</li>
+        </ul>
+      </div>
+      
+      <div class="success-message" id="successMessage">
+        <h3><i class="fas fa-check-circle"></i> 加载成功！</h3>
+        <p>内容已成功加载，即将显示...</p>
+      </div>
+      
+      <iframe class="content" id="contentFrame" src="about:blank"></iframe>
+      
+      <div class="action-buttons">
+        <button class="action-btn reload-btn" id="reloadBtn">
+          <i class="fas fa-redo"></i> 重新加载
+        </button>
+        <a href="https://pages.github.com/" class="action-btn guide-btn" target="_blank">
+          <i class="fas fa-book"></i> GitHub Pages指南
+        </a>
+      </div>
+      
+      <a href="https://github.com/" class="github-link" target="_blank">
+        <i class="fab fa-github"></i> 访问 GitHub 控制台
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // 主加载函数
+    function loadContent() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const encodedParam = urlParams.get('c');
+      const urlDisplay = document.getElementById('urlDisplay');
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+      const loader = document.querySelector('.loader');
+      const contentFrame = document.getElementById('contentFrame');
+      const errorDetail = document.getElementById('errorDetail');
+      
+      // 显示加载状态
+      urlDisplay.textContent = "正在解析URL参数...";
+      errorMessage.style.display = "none";
+      successMessage.style.display = "none";
+      
+      // 检查是否有URL参数
+      if (!encodedParam) {
+        showError("缺少URL参数 'c'。请确保URL格式为：?c=Base64编码的URL");
+        return;
+      }
+      
+      try {
+        // 解码Base64 URL
+        const trueUrl = atob(encodedParam);
+        urlDisplay.textContent = trueUrl;
+        
+        // 检查是否是有效的HTTP URL
+        if (!trueUrl.startsWith('http')) {
+          showError("无效的URL格式。必须以http://或https://开头");
+          return;
+        }
+        
+        // 显示成功状态
+        successMessage.style.display = "block";
+        
+        // 模拟加载进度
+        simulateLoading(() => {
+          // 设置iframe的src
+          contentFrame.src = trueUrl;
+          
+          // 隐藏加载动画，显示内容
+          setTimeout(() => {
+            loader.style.display = "none";
+            contentFrame.style.display = "block";
+          }, 1000);
+        });
+        
+      } catch(e) {
+        showError("URL解码错误: " + e.message);
+      }
+    }
+    
+    // 模拟加载进度
+    function simulateLoading(callback) {
+      const statusInfo = document.querySelector('.status-info p');
+      const steps = [
+        "正在解析URL参数...",
+        "正在连接目标服务器...",
+        "验证内容安全性...",
+        "准备渲染页面...",
+        "加载完成！"
+      ];
+      
+      let step = 0;
+      const interval = setInterval(() => {
+        if (step < steps.length) {
+          statusInfo.textContent = steps[step];
+          step++;
+        } else {
+          clearInterval(interval);
+          if (callback) callback();
+        }
+      }, 800);
+    }
+    
+    // 显示错误信息
+    function showError(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      const errorDetail = document.getElementById('errorDetail');
+      const loader = document.querySelector('.loader');
+      
+      errorDetail.textContent = message;
+      errorMessage.style.display = "block";
+      loader.style.opacity = "0.3";
+    }
+    
+    // 重新加载页面
+    document.getElementById('reloadBtn').addEventListener('click', () => {
+      location.reload();
+    });
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', loadContent);
+  </script>
+</body>
+</html>
